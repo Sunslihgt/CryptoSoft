@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 public class CryptoSoft
 {
@@ -26,29 +27,45 @@ public class CryptoSoft
 
         if (key == null || key.Length < 16)
         {
-            return -1; // Key is null
+            return -1;
         }
 
-        // Start stopwatch
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        byte[] keyBytes = System.Text.Encoding.UTF8.GetBytes(key);
+        byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+        const int bufferSize = 1024 * 1024; // 1 MB buffer
 
-        byte[] inputBytes = File.ReadAllBytes(inputFilePath);
-        byte[] outputBytes = new byte[inputBytes.Length];
-
-        // Encrypt
-        for (int i = 0; i < inputBytes.Length; i++)
+        // Encrypt/Decrypt the file using XOR encryption/decryption
+        try
         {
-            outputBytes[i] = (byte)(inputBytes[i] ^ keyBytes[i % keyBytes.Length]);
+            // Use a buffer to read/write the file in chunks to reduce memory usage for large files
+            using (FileStream inputStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
+            using (FileStream outputStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
+            {
+                byte[] buffer = new byte[bufferSize];
+                int bytesRead;
+                long position = 0;
+
+                while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        buffer[i] ^= keyBytes[(position + i) % keyBytes.Length];
+                    }
+
+                    outputStream.Write(buffer, 0, bytesRead);
+                    position += bytesRead;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            return -1;
         }
 
-        File.WriteAllBytes(outputFilePath, outputBytes);
-
-        // Stop stopwatch
         stopwatch.Stop();
-        Console.WriteLine($"Time taken: {stopwatch.ElapsedMilliseconds} ms");
 
         return (int) stopwatch.Elapsed.TotalMilliseconds;
     }
