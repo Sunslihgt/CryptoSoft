@@ -5,15 +5,15 @@ It is a simple software that allows you to encrypt and decrypt files using the s
 
 The software is written in C# and is used from a command line interface.
 ## Install 
-  1 Download win-64 from https://github.com/Sunslihgt/CryptoSoft/releases
-  1.2 Extract the archive in the destination folder chosen
-  1.3 Copy the folder address of the executable
-  1.4 Go to Windows search Change system environment variables, click on environment variables, new and paste the folder address of the executable, click OK in each window to confirm
-  1.5 Restart all currently open terminals if necessary
+  Download win-64 from https://github.com/Sunslihgt/CryptoSoft/releases
+  Extract the archive in the destination folder chosen
+  Copy the folder address of the executable
+  Go to Windows search Change system environment variables, click on environment variables, new and paste the folder address of the executable, click OK in each window to confirm
+  Restart all currently open terminals if necessary
 Verify the install :
-  1.6 Launch a PowerShell window
-  1.7 Run the command Where.exe CryptoSoft.exe
-  1.8 If the full path of the software is displayed, the installation is complete
+  Launch a PowerShell window
+  Run the command Where.exe CryptoSoft.exe
+  If the full path of the software is displayed, the installation is complete
 
 ## Usage
 ```
