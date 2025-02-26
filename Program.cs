@@ -1,23 +1,36 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
 
 public class CryptoSoft
 {
+    public readonly static string MUTEX_NAME = "Global/CryptoSoftMutex"; // System-wide unique mutex name
+
     public static int Main(string[] args)
     {
-        if (args.Length != 3)
+        using (Mutex mutex = new Mutex(false, MUTEX_NAME))
         {
-            return -1; // Argument count is incorrect
-        }
+            mutex.WaitOne();
 
-        string inputFilePath = args[0];
-        string outputFilePath = args[1];
-        string key = args[2];
+            // Proceed with normal execution
+            if (args.Length != 3)
+            {
+                return -1; // Argument count is incorrect
+            }
 
-        return EncryptDecryptFile(inputFilePath, outputFilePath, key);
+            string inputFilePath = args[0];
+            string outputFilePath = args[1];
+            string key = args[2];
+
+            int cryptoTime = EncryptDecryptFile(inputFilePath, outputFilePath, key);
+
+            mutex.ReleaseMutex();
+
+            return cryptoTime;
+        } 
     }
 
-    // Returns the time taken to encrypt/decrypt the file in milliseconds or -1 if an error occurred
     private static int EncryptDecryptFile(string inputFilePath, string outputFilePath, string key)
     {
         if (!File.Exists(inputFilePath))
@@ -36,10 +49,8 @@ public class CryptoSoft
         byte[] keyBytes = Encoding.UTF8.GetBytes(key);
         const int bufferSize = 1024 * 1024; // 1 MB buffer
 
-        // Encrypt/Decrypt the file using XOR encryption/decryption
         try
         {
-            // Use a buffer to read/write the file in chunks to reduce memory usage for large files
             using (FileStream inputStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
             using (FileStream outputStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
             {
@@ -66,7 +77,6 @@ public class CryptoSoft
         }
 
         stopwatch.Stop();
-
-        return (int) stopwatch.Elapsed.TotalMilliseconds;
+        return (int)stopwatch.Elapsed.TotalMilliseconds;
     }
 }
