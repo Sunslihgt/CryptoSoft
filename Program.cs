@@ -5,16 +5,13 @@ using System.Threading;
 
 public class CryptoSoft
 {
+    public readonly static string MUTEX_NAME = "Global/CryptoSoftMutex"; // System-wide unique mutex name
+
     public static int Main(string[] args)
     {
-        const string mutexName = "Global/CryptoSoftMutex"; // System-wide unique mutex name
-        using (Mutex mutex = new Mutex(true, mutexName, out bool createdNew))
+        using (Mutex mutex = new Mutex(false, MUTEX_NAME))
         {
-            if (!createdNew)
-            {
-                // Another instance is already running
-                return -1;
-            }
+            mutex.WaitOne();
 
             // Proceed with normal execution
             if (args.Length != 3)
@@ -26,7 +23,11 @@ public class CryptoSoft
             string outputFilePath = args[1];
             string key = args[2];
 
-            return EncryptDecryptFile(inputFilePath, outputFilePath, key);
+            int cryptoTime = EncryptDecryptFile(inputFilePath, outputFilePath, key);
+
+            mutex.ReleaseMutex();
+
+            return cryptoTime;
         } 
     }
 
